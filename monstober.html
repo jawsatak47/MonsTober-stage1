@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CanvasWars: MonsTober — Live Art Battle</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rubik+Wet+Paint&family=Anton&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --bg: #0b0e08;
+  --bg2: #12160d;
+  --surface: #171c11;
+  --surface2: #1e2416;
+  --ink: #eae5d4;
+  --ink-dim: #a8a893;
+  --green: #6fbf3f;
+  --green-dim: #3d6b26;
+  --green-glow: #9be86a;
+  --orange: #ff7a1a;
+  --gold: #c9a227;
+  --blood: #9c2020;
+  --line: #2c331e;
+  --radius: 2px;
+}
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+html{ scroll-behavior:smooth; }
+
+body{
+  background:
+    radial-gradient(ellipse 900px 500px at 50% -10%, rgba(111,191,63,0.10), transparent 60%),
+    var(--bg);
+  color: var(--ink);
+  font-family:'Space Grotesk', sans-serif;
+  line-height:1.5;
+  overflow-x:hidden;
+}
+
+/* film grain / scanline overlay */
+.grain{
+  position:fixed; inset:0; z-index:9999; pointer-events:none;
+  background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px);
+  mix-blend-mode:overlay; opacity:0.5;
+}
+.grain::after{
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(ellipse 120% 120% at 50% 50%, transparent 55%, rgba(0,0,0,0.55) 100%);
+}
+
+@media (prefers-reduced-motion: no-preference){
+  .flicker{ animation: flicker 6s infinite; }
+}
+@keyframes flicker{
+  0%,93%,96%,100%{ opacity:1; }
+  94%{ opacity:0.82; }
+  95%{ opacity:0.94; }
+  97%{ opacity:0.7; }
+}
+
+a{ color:inherit; }
+.eyebrow{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:0.72rem;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color: var(--green-glow);
+}
+.section{ padding: 90px 24px; max-width:1180px; margin:0 auto; position:relative; }
+.section-tight{ padding-top:50px; padding-bottom:50px; }
+
+/* ===== Ticker ===== */
+.ticker-wrap{
+  background:#000; border-bottom:1px solid var(--line); overflow:hidden;
+  white-space:nowrap; position:sticky; top:0; z-index:100;
+}
+.ticker{
+  display:inline-block; padding-left:100%;
+  font-family:'IBM Plex Mono', monospace; font-size:0.72rem; letter-spacing:0.08em;
+  color: var(--green); padding-top:7px; padding-bottom:7px;
+}
+@media (prefers-reduced-motion: no-preference){
+  .ticker{ animation: ticker 32s linear infinite; }
+}
+@keyframes ticker{ from{ transform:translateX(0);} to{ transform:translateX(-100%);} }
+.ticker span{ margin-right:3.5em; }
+.ticker .dot{ color: var(--orange); margin-right:3.5em; }
+
+/* ===== Nav ===== */
+nav{
+  display:flex; justify-content:space-between; align-items:center;
+  padding: 18px 24px; max-width:1180px; margin:0 auto;
+  font-family:'IBM Plex Mono', monospace; font-size:0.78rem; letter-spacing:0.05em;
+}
+.nav-brand{ color: var(--ink); text-transform:uppercase; letter-spacing:0.15em; font-weight:600;}
+.nav-brand b{ color:var(--green-glow); }
+.nav-links{ display:flex; gap:26px; }
+.nav-links a{ text-decoration:none; color:var(--ink-dim); transition:color .2s; }
+.nav-links a:hover{ color:var(--green-glow); }
+@media (max-width:720px){ .nav-links{ display:none; } }
+
+/* ===== Hero ===== */
+.hero{ text-align:center; padding: 70px 24px 60px; position:relative; }
+.hero-presents{
+  font-family:'IBM Plex Mono', monospace; font-size:0.75rem; letter-spacing:0.3em;
+  text-transform:uppercase; color:var(--ink-dim); margin-bottom:18px;
+}
+.hero-presents b{ color:var(--gold); }
+.hero-title-1{
+  font-family:'Anton', sans-serif; font-size: clamp(2.6rem, 9vw, 5.6rem);
+  letter-spacing:0.02em; text-transform:uppercase; color:var(--ink);
+  line-height:0.95; text-shadow: 0 0 30px rgba(234,229,212,0.08);
+}
+.hero-title-2{
+  font-family:'Rubik Wet Paint', cursive; font-weight:400;
+  font-size: clamp(3.2rem, 13vw, 8.5rem);
+  line-height:0.9; margin-top:6px;
+  color: var(--green);
+  text-shadow:
+    3px 3px 0 rgba(0,0,0,0.5),
+    0 0 40px rgba(111,191,63,0.35);
+  -webkit-text-stroke: 1px rgba(0,0,0,0.4);
+}
+.hero-sub{
+  margin: 26px auto 0; max-width:560px; color:var(--ink-dim); font-size:1.02rem;
+}
+.hero-meta{
+  display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:34px;
+}
+.pill{
+  border:1px solid var(--line); background:var(--surface);
+  padding:9px 16px; border-radius:20px; font-family:'IBM Plex Mono', monospace;
+  font-size:0.78rem; color:var(--ink); letter-spacing:0.02em;
+}
+.pill b{ color:var(--green-glow); }
+.pill.tentative{ border-color: rgba(255,122,26,0.4); color:var(--orange); }
+
+.hero-cta{ margin-top:40px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+.btn{
+  font-family:'IBM Plex Mono', monospace; font-size:0.82rem; letter-spacing:0.05em;
+  text-transform:uppercase; text-decoration:none; padding:14px 26px; border-radius:2px;
+  transition: transform .15s ease, box-shadow .15s ease; display:inline-block; font-weight:600;
+  border:1px solid transparent;
+}
+.btn:hover{ transform: translateY(-2px); }
+.btn-primary{ background: var(--green); color:#0b0e08; box-shadow:0 0 0 rgba(111,191,63,0); }
+.btn-primary:hover{ box-shadow:0 6px 24px rgba(111,191,63,0.35); }
+.btn-ghost{ background:transparent; border-color:var(--line); color:var(--ink); }
+.btn-ghost:hover{ border-color:var(--green); color:var(--green-glow); }
+
+.draft-flag{
+  display:inline-block; margin-top:30px; font-family:'IBM Plex Mono', monospace;
+  font-size:0.68rem; letter-spacing:0.15em; text-transform:uppercase; color:#7a7a6a;
+  border:1px dashed #3a3a2e; padding:6px 14px; border-radius:20px;
+}
+
+/* ===== Section headers ===== */
+.sec-head{ display:flex; align-items:baseline; gap:16px; margin-bottom:38px; flex-wrap:wrap; }
+.sec-title{
+  font-family:'Anton', sans-serif; text-transform:uppercase; letter-spacing:0.01em;
+  font-size: clamp(1.7rem, 4vw, 2.5rem); color:var(--ink);
+}
+.sec-title em{ font-style:normal; color:var(--green); }
+.sec-rule{ flex:1; height:1px; background: var(--line); min-width:40px; }
+
+/* ===== Format / VS bracket ===== */
+.format-grid{ display:grid; grid-template-columns: 1.1fr 1fr; gap:50px; align-items:center; }
+@media (max-width:860px){ .format-grid{ grid-template-columns:1fr; } }
+.format-copy p{ color:var(--ink-dim); margin-bottom:16px; }
+.spec-list{ list-style:none; margin-top:22px; display:grid; gap:10px; }
+.spec-list li{
+  font-family:'IBM Plex Mono', monospace; font-size:0.85rem; color:var(--ink);
+  padding-left:20px; position:relative;
+}
+.spec-list li::before{ content:'▚'; position:absolute; left:0; color:var(--green); }
+
+.bracket{
+  background: var(--surface); border:1px solid var(--line); border-radius:4px;
+  padding:34px 22px; position:relative;
+}
+.bracket-label{ text-align:center; font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:0.2em; color:var(--ink-dim); text-transform:uppercase; margin-bottom:22px;}
+.vs-grid{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:14px; }
+.vs-col{ display:grid; gap:14px; }
+.slot{
+  border:1px solid var(--line); background:var(--surface2); border-radius:2px;
+  padding:14px 10px; text-align:center; font-family:'IBM Plex Mono', monospace;
+  font-size:0.78rem; color:var(--ink-dim); transition:.2s;
+}
+.slot:hover{ border-color:var(--green); color:var(--green-glow); }
+.vs-center{
+  font-family:'Anton', sans-serif; font-size:1.4rem; color:var(--orange);
+  writing-mode:vertical-rl; text-orientation:mixed; letter-spacing:0.1em;
+}
+.bracket-note{ text-align:center; margin-top:20px; color:var(--ink-dim); font-size:0.78rem; font-family:'IBM Plex Mono', monospace;}
+
+/* ===== Timeline ===== */
+.timeline{ position:relative; padding-left:2px; }
+.timeline::before{
+  content:''; position:absolute; left:98px; top:6px; bottom:6px; width:1px;
+  background: linear-gradient(var(--green-dim), var(--line));
+}
+@media (max-width:600px){ .timeline::before{ left:70px; } }
+.t-row{ display:grid; grid-template-columns:88px 1fr; gap:24px; padding:16px 0; position:relative; }
+@media (max-width:600px){ .t-row{ grid-template-columns:60px 1fr; gap:14px; } }
+.t-time{
+  font-family:'IBM Plex Mono', monospace; font-size:0.82rem; color:var(--green-glow); text-align:right; padding-top:2px;
+}
+.t-body{ position:relative; padding-left:26px; }
+.t-body::before{
+  content:''; position:absolute; left:-5px; top:6px; width:9px; height:9px; border-radius:50%;
+  background: var(--bg); border:2px solid var(--green); z-index:2;
+}
+.t-title{ font-weight:600; margin-bottom:2px; }
+.t-desc{ color:var(--ink-dim); font-size:0.9rem; }
+
+/* ===== Judging / Prizes ===== */
+.two-col{ display:grid; grid-template-columns:1fr 1fr; gap:26px; }
+@media (max-width:780px){ .two-col{ grid-template-columns:1fr; } }
+.card{
+  background: var(--surface); border:1px solid var(--line); border-radius:4px; padding:28px;
+}
+.card h3{
+  font-family:'Anton', sans-serif; text-transform:uppercase; letter-spacing:0.02em;
+  font-size:1.2rem; margin-bottom:16px; color:var(--ink);
+}
+.crit-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.crit{
+  border:1px solid var(--line); border-radius:2px; padding:12px 14px;
+  font-family:'IBM Plex Mono', monospace; font-size:0.82rem; color:var(--ink-dim);
+}
+.crit b{ display:block; color:var(--green-glow); font-size:0.95rem; margin-bottom:2px; }
+
+.prize-row{ display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px solid var(--line); }
+.prize-row:last-of-type{ border-bottom:none; }
+.prize-place{ font-family:'IBM Plex Mono', monospace; color:var(--ink-dim); font-size:0.85rem; }
+.prize-amt{ font-family:'Anton', sans-serif; font-size:1.3rem; color:var(--orange); }
+.fee-note{ margin-top:14px; font-size:0.82rem; color:var(--ink-dim); border-top:1px dashed var(--line); padding-top:14px; }
+
+/* ===== Display / Sale terms ===== */
+.split-visual{ display:flex; gap:8px; margin:14px 0; }
+.split-bar{ height:34px; border-radius:2px; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono', monospace; font-size:0.78rem; }
+.split-artist{ background: var(--green-dim); color:var(--ink); }
+.split-event{ background: var(--surface2); color:var(--ink-dim); border:1px solid var(--line); }
+
+/* ===== Sponsorship ===== */
+.tier-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+@media (max-width:860px){ .tier-grid{ grid-template-columns:1fr; } }
+.tier{
+  border:1px solid var(--line); border-radius:4px; padding:26px 22px; background:var(--surface);
+  position:relative; overflow:hidden;
+}
+.tier.title-tier{ border-color: var(--gold); box-shadow:0 0 0 1px rgba(201,162,39,0.15) inset; }
+.tier-eyebrow{ font-family:'IBM Plex Mono', monospace; font-size:0.68rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--ink-dim); }
+.title-tier .tier-eyebrow{ color:var(--gold); }
+.tier-name{ font-family:'Anton', sans-serif; font-size:1.4rem; text-transform:uppercase; margin:6px 0 12px; }
+.tier ul{ list-style:none; display:grid; gap:7px; font-size:0.85rem; color:var(--ink-dim); }
+.tier ul li::before{ content:'— '; color:var(--green); }
+.slots-open{ font-family:'IBM Plex Mono', monospace; font-size:0.72rem; color:var(--orange); margin-top:14px; display:inline-block; }
+
+.needs-strip{ display:flex; flex-wrap:wrap; gap:10px; margin-top:34px; }
+.need-tag{
+  border:1px solid var(--line); background:var(--surface); padding:7px 14px; border-radius:20px;
+  font-family:'IBM Plex Mono', monospace; font-size:0.75rem; color:var(--ink-dim);
+}
+.brands-note{ margin-top:22px; color:var(--ink-dim); font-size:0.85rem; }
+.brands-note b{ color:var(--ink); }
+
+/* ===== Vendor / Location ===== */
+.loc-grid{ display:grid; grid-template-columns:1fr 1fr; gap:30px; }
+@media (max-width:780px){ .loc-grid{ grid-template-columns:1fr; } }
+
+/* ===== Footer ===== */
+footer{
+  border-top:1px solid var(--line); padding:50px 24px 40px; text-align:center;
+  font-family:'IBM Plex Mono', monospace; font-size:0.78rem; color:var(--ink-dim);
+}
+footer .brandline{ color:var(--green-glow); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px; }
+.foot-links{ display:flex; gap:20px; justify-content:center; margin-top:14px; flex-wrap:wrap; }
+.foot-links a{ text-decoration:none; color:var(--ink-dim); border-bottom:1px solid var(--line); padding-bottom:2px; }
+.foot-links a:hover{ color:var(--green-glow); border-color:var(--green); }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span>LIVE ILLUSTRATIVE ART BATTLE</span><span class="dot">◆</span>
+    <span>4 ARTISTS · 1v1v1v1 · TIMED</span><span class="dot">◆</span>
+    <span>SAT OCT 3 · PHOENIX PHOODERY · MEDFORD OR</span><span class="dot">◆</span>
+    <span>BLACK &amp; WHITE · SHARPIE + ACRYLIC · 18"×24"</span><span class="dot">◆</span>
+    <span>$100 / $75 / $50 / $25 PRIZE PAYOUT</span><span class="dot">◆</span>
+    <span>SPONSORSHIP &amp; VENDOR SPOTS OPEN NOW</span><span class="dot">◆</span>
+    <span>LIVE ILLUSTRATIVE ART BATTLE</span><span class="dot">◆</span>
+    <span>4 ARTISTS · 1v1v1v1 · TIMED</span><span class="dot">◆</span>
+    <span>SAT OCT 3 · PHOENIX PHOODERY · MEDFORD OR</span><span class="dot">◆</span>
+    <span>BLACK &amp; WHITE · SHARPIE + ACRYLIC · 18"×24"</span><span class="dot">◆</span>
+    <span>$100 / $75 / $50 / $25 PRIZE PAYOUT</span><span class="dot">◆</span>
+    <span>SPONSORSHIP &amp; VENDOR SPOTS OPEN NOW</span><span class="dot">◆</span>
+  </div>
+</div>
+
+<nav>
+  <div class="nav-brand">Canvas<b>Wars</b> · MonsTober</div>
+  <div class="nav-links">
+    <a href="#format">Format</a>
+    <a href="#schedule">Schedule</a>
+    <a href="#judging">Judging</a>
+    <a href="#sponsor">Sponsor</a>
+    <a href="#vendor">Vendors</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-presents">A <b>QuarkForce</b> Event · Presented by CanvasWars</div>
+  <div class="hero-title-1 flicker">CanvasWars</div>
+  <div class="hero-title-2">MonsTober</div>
+  <p class="hero-sub">Four artists. One stage. A timed live battle to bring a monster to life in black, white, and whatever nerve it takes to finish first.</p>
+
+  <div class="hero-meta">
+    <div class="pill tentative">Sat, Oct 3 <span style="opacity:.6">(tentative)</span></div>
+    <div class="pill">11 AM – 5 PM</div>
+    <div class="pill">Phoenix Phoodery, Medford OR</div>
+    <div class="pill"><b>4</b> Artist Slots · <b>3–5</b> Vendor Spots</div>
+  </div>
+
+  <div class="hero-cta">
+    <a class="btn btn-primary" href="#sponsor">Become a Sponsor</a>
+    <a class="btn btn-ghost" href="#vendor">Vendor / Artist Inquiry</a>
+  </div>
+  <div class="draft-flag">Rough draft — details subject to change</div>
+</header>
+
+<!-- FORMAT -->
+<section class="section" id="format">
+  <div class="sec-head"><h2 class="sec-title">The <em>Battle</em> Format</h2><div class="sec-rule"></div></div>
+  <div class="format-grid">
+    <div class="format-copy">
+      <p>Four selected artists take the stage at the same time for a live, timed illustrative showdown. Everyone works the same brief, the same materials, and the same clock — the only variable is what each artist brings to life.</p>
+      <p>The brief: bring a monster to the canvas. A favorite creature, or something born on the spot. No color to hide behind — just line, contrast, and nerve.</p>
+      <ul class="spec-list">
+        <li>4 artists, 1v1v1v1, live on stage</li>
+        <li>Subject: an original or favorite monster</li>
+        <li>Palette: strict black &amp; white, two-tone</li>
+        <li>Medium: black Sharpie + white acrylic paint</li>
+        <li>Surface: 18"×24" canvas</li>
+        <li>All materials supplied to the artist</li>
+      </ul>
+    </div>
+    <div class="bracket">
+      <div class="bracket-label">Stage Layout</div>
+      <div class="vs-grid">
+        <div class="vs-col">
+          <div class="slot">Artist 01</div>
+          <div class="slot">Artist 02</div>
+        </div>
+        <div class="vs-center">VS</div>
+        <div class="vs-col">
+          <div class="slot">Artist 03</div>
+          <div class="slot">Artist 04</div>
+        </div>
+      </div>
+      <div class="bracket-note">All four battle simultaneously — not a bracket elimination</div>
+    </div>
+  </div>
+</section>
+
+<!-- SCHEDULE -->
+<section class="section" id="schedule">
+  <div class="sec-head"><h2 class="sec-title">Day-Of <em>Schedule</em></h2><div class="sec-rule"></div></div>
+  <div class="timeline">
+    <div class="t-row">
+      <div class="t-time">11:00 AM</div>
+      <div class="t-body"><div class="t-title">Doors &amp; start</div><div class="t-desc">Event opens, canvases go up, artists begin.</div></div>
+    </div>
+    <div class="t-row">
+      <div class="t-time">3:30 PM</div>
+      <div class="t-body"><div class="t-title">Painting ends</div><div class="t-desc">Brushes and markers down — pencils, er, Sharpies stay capped.</div></div>
+    </div>
+    <div class="t-row">
+      <div class="t-time">4:30 PM</div>
+      <div class="t-body"><div class="t-title">Prizes announced</div><div class="t-desc">Judge scores + audience vote combine for final standings.</div></div>
+    </div>
+    <div class="t-row">
+      <div class="t-time">5:00 PM+</div>
+      <div class="t-body"><div class="t-title">Clean up</div><div class="t-desc">Load out, art display setup for the following week.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- JUDGING + PRIZES -->
+<section class="section" id="judging">
+  <div class="sec-head"><h2 class="sec-title">Judging &amp; <em>Prizes</em></h2><div class="sec-rule"></div></div>
+  <div class="two-col">
+    <div class="card">
+      <h3>How Winners Are Chosen</h3>
+      <p style="color:var(--ink-dim); font-size:0.9rem; margin-bottom:18px;">Voting is split between 2 guest judges and live audience votes cast through the event app.</p>
+      <div class="crit-grid">
+        <div class="crit"><b>Skill</b>Technical execution</div>
+        <div class="crit"><b>Creativity</b>Originality of the piece</div>
+        <div class="crit"><b>Impact</b>Does it land from across the room</div>
+        <div class="crit"><b>Use of Time</b>Finished &amp; resolved on the clock</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Prize Payout</h3>
+      <div class="prize-row"><span class="prize-place">1st Place</span><span class="prize-amt">$100</span></div>
+      <div class="prize-row"><span class="prize-place">2nd Place</span><span class="prize-amt">$75</span></div>
+      <div class="prize-row"><span class="prize-place">3rd Place</span><span class="prize-amt">$50</span></div>
+      <div class="prize-row"><span class="prize-place">4th Place</span><span class="prize-amt">$25</span></div>
+      <div class="fee-note">Artists pay a $25 entry fee, fully returned through prize payout — every competitor gets paid.</div>
+    </div>
+  </div>
+</section>
+
+<!-- DISPLAY / SALE -->
+<section class="section section-tight">
+  <div class="sec-head"><h2 class="sec-title">After The <em>Battle</em></h2><div class="sec-rule"></div></div>
+  <div class="two-col">
+    <div class="card">
+      <h3>On Display</h3>
+      <p style="color:var(--ink-dim); font-size:0.9rem;">Finished pieces hang for one week at Timeless Treasures Hub in Medford, available for purchase at the artist's asking price.</p>
+      <div class="split-visual">
+        <div class="split-bar split-artist" style="flex:7;">70% Artist</div>
+        <div class="split-bar split-event" style="flex:3;">30% Event</div>
+      </div>
+      <div class="fee-note">Split applies to sales made during the display week.</div>
+    </div>
+    <div class="card">
+      <h3>After the Display Window</h3>
+      <p style="color:var(--ink-dim); font-size:0.9rem;">Pieces can still be purchased after the competition and display week close, at an adjusted split.</p>
+      <div class="split-visual">
+        <div class="split-bar split-artist" style="flex:8;">80% Artist</div>
+        <div class="split-bar split-event" style="flex:2;">20%</div>
+      </div>
+      <div class="fee-note">Split applies to sales made after the display window ends.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SPONSORSHIP -->
+<section class="section" id="sponsor">
+  <div class="sec-head"><h2 class="sec-title">Sponsorship <em>Tiers</em></h2><div class="sec-rule"></div></div>
+  <div class="tier-grid">
+    <div class="tier title-tier">
+      <div class="tier-eyebrow">Tier 01</div>
+      <div class="tier-name">Title Sponsor</div>
+      <ul>
+        <li>Top billing across all event materials</li>
+        <li>1 spot available</li>
+        <li>First right on brand integration</li>
+      </ul>
+      <span class="slots-open">1 SPOT OPEN</span>
+    </div>
+    <div class="tier">
+      <div class="tier-eyebrow">Tier 02–03</div>
+      <div class="tier-name">Co-Sponsor</div>
+      <ul>
+        <li>Featured billing on event signage</li>
+        <li>2 spots available</li>
+      </ul>
+      <span class="slots-open">2 SPOTS OPEN</span>
+    </div>
+    <div class="tier">
+      <div class="tier-eyebrow">Tier 04–06</div>
+      <div class="tier-name">Supporting Sponsor</div>
+      <ul>
+        <li>Listed sponsor recognition</li>
+        <li>3 spots available</li>
+      </ul>
+      <span class="slots-open">3 SPOTS OPEN</span>
+    </div>
+  </div>
+
+  <div class="needs-strip">
+    <span class="need-tag">(4) 18"×24" canvases</span>
+    <span class="need-tag">Black Sharpies — mixed sizes</span>
+    <span class="need-tag">White acrylic paint</span>
+    <span class="need-tag">White paint pens</span>
+    <span class="need-tag">Prize cash</span>
+    <span class="need-tag">Gift certificates (TBD)</span>
+  </div>
+  <p class="brands-note"><b>In conversation:</b> Scrappy Craft, Staples, Sharpie, PPG, Life Art, Timeless Treasures Hub, Rosemary &amp; Co, Posca, Michaels, Blick, Windsor &amp; Newton — plus open to art supply, tattoo, and adjacent local brands.</p>
+</section>
+
+<!-- VENDOR / LOCATION -->
+<section class="section" id="vendor">
+  <div class="sec-head"><h2 class="sec-title">Vendors &amp; <em>Location</em></h2><div class="sec-rule"></div></div>
+  <div class="loc-grid">
+    <div class="card">
+      <h3>Artist / Vendor Booths</h3>
+      <p style="color:var(--ink-dim); font-size:0.9rem;">3–5 booth spots open for local artists and vendors to set up alongside the battle — bring the makers, the crowd, and the businesses into one room.</p>
+      <a class="btn btn-primary" style="margin-top:20px;" href="#">Request a Booth Spot</a>
+    </div>
+    <div class="card">
+      <h3>Location</h3>
+      <p style="color:var(--ink-dim); font-size:0.9rem;">Phoenix Phoodery<br>Medford, Oregon</p>
+      <p class="fee-note">Full address &amp; parking details to follow as the date is confirmed.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="brandline">CanvasWars × QuarkForce</div>
+  <div>MonsTober is a QuarkForce production, presented by CanvasWars.</div>
+  <div class="foot-links">
+    <a href="#sponsor">Sponsor This Event</a>
+    <a href="#vendor">Vendor Inquiry</a>
+    <a href="#">Artist Application</a>
+  </div>
+</footer>
+
+</body>
+</html>
