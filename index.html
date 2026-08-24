@@ -270,6 +270,18 @@ nav{
 .loc-grid{ display:grid; grid-template-columns:1fr 1fr; gap:30px; }
 @media (max-width:780px){ .loc-grid{ grid-template-columns:1fr; } }
 
+/* ===== Hero Image / Logo ===== */
+.hero-image-wrap {
+  text-align: center;
+  padding: 30px 24px 0;
+}
+.hero-image-wrap img {
+  max-width: 280px;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 0 20px rgba(111,191,63,0.25));
+}
+
 /* ===== Footer ===== */
 footer{
   border-top:1px solid var(--line); padding:50px 24px 40px; text-align:center;
@@ -312,6 +324,10 @@ footer .brandline{ color:var(--green-glow); letter-spacing:0.1em; text-transform
     <a href="#vendor">Vendors</a>
   </div>
 </nav>
+
+<div class="hero-image-wrap">
+  <img src="your-image-file-name.png" alt="CanvasWars MonsTober Graphic">
+</div>
 
 <header class="hero">
   <div class="hero-presents">A <b>QuarkForce</b> Event · Presented by CanvasWars</div>
@@ -509,9 +525,7 @@ footer .brandline{ color:var(--green-glow); letter-spacing:0.1em; text-transform
     <a href="mailto:jawsatak47@gmail.com">Sponsor This Event</a>
     <a href="mailto:jawsatak47@gmail.com">Vendor Inquiry</a>
     <a href="https://square.link/u/n18HwpIV">Artist Fee</a>
-   <a href="https://mail.google.com/mail/?view=cm&fs=1&to=jawsatak47@gmail.com" target="_blank" rel="noopener noreferrer">
-    Send me an email
-</a>
+    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=jawsatak47@gmail.com" target="_blank" rel="noopener noreferrer">Send me an email</a>
   </div>
 </footer>
 
