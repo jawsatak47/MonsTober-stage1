@@ -165,8 +165,8 @@ nav{
 .sec-rule{ flex:1; height:1px; background: var(--line); min-width:40px; }
 
 /* ===== Format / VS bracket ===== */
-.format-grid{ display:grid; grid-template-columns: 1.1fr 1fr; gap:50px; align-items:center; }
-@media (max-width:860px){ .format-grid{ grid-template-columns:1fr; } }
+.format-grid{ display:grid; grid-template-columns: 1fr 1.1fr; gap:40px; align-items:center; }
+@media (max-width:960px){ .format-grid{ grid-template-columns:1fr; } }
 .format-copy p{ color:var(--ink-dim); margin-bottom:16px; }
 .spec-list{ list-style:none; margin-top:22px; display:grid; gap:10px; }
 .spec-list li{
@@ -175,24 +175,77 @@ nav{
 }
 .spec-list li::before{ content:'▚'; position:absolute; left:0; color:var(--green); }
 
+/* ===== Redesigned Stage Layout ===== */
 .bracket{
-  background: var(--surface); border:1px solid var(--line); border-radius:4px;
-  padding:34px 22px; position:relative;
+  background: radial-gradient(ellipse at center, rgba(111,191,63,0.05) 0%, rgba(18,22,13,0.95) 70%), var(--surface);
+  border:1px solid var(--line); border-radius:6px;
+  padding:28px 20px; position:relative; overflow:hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
-.bracket-label{ text-align:center; font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:0.2em; color:var(--ink-dim); text-transform:uppercase; margin-bottom:22px;}
-.vs-grid{ display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:14px; }
-.vs-col{ display:grid; gap:14px; }
-.slot{
-  border:1px solid var(--line); background:var(--surface2); border-radius:2px;
-  padding:12px 8px; text-align:center; font-family:'IBM Plex Mono', monospace;
-  font-size:0.78rem; color:var(--ink-dim); transition:.2s;
+.bracket::before {
+  content:''; position:absolute; inset:0;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 20px 20px; opacity:0.15; pointer-events:none;
 }
-.slot:hover{ border-color:var(--green); color:var(--green-glow); }
-.vs-center{
-  font-family:'Anton', sans-serif; font-size:1.4rem; color:var(--orange);
-  writing-mode:vertical-rl; text-orientation:mixed; letter-spacing:0.1em;
+.bracket-label{
+  text-align:center; font-family:'IBM Plex Mono',monospace; font-size:0.75rem;
+  letter-spacing:0.25em; color:var(--green-glow); text-transform:uppercase; margin-bottom:20px;
+  display:flex; align-items:center; justify-content:center; gap:8px;
 }
-.bracket-note{ text-align:center; margin-top:20px; color:var(--ink-dim); font-size:0.78rem; font-family:'IBM Plex Mono', monospace;}
+.bracket-label::before, .bracket-label::after {
+  content:''; width:24px; height:1px; background:var(--green-dim);
+}
+
+.stage-floor {
+  display: flex; flex-direction: column; gap: 14px; position: relative; z-index: 1;
+}
+.stage-row {
+  display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
+}
+.stage-center-hub {
+  display: flex; align-items: center; justify-content: center;
+  padding: 8px; margin: 4px 0;
+  background: rgba(111, 191, 63, 0.08);
+  border: 1px dashed var(--green-dim);
+  border-radius: 4px; position: relative;
+}
+.stage-hub-title {
+  font-family: 'Anton', sans-serif; font-size: 1.1rem; color: var(--orange);
+  letter-spacing: 0.12em; text-transform: uppercase; display: flex; align-items: center; gap: 10px;
+}
+.stage-hub-title::before, .stage-hub-title::after {
+  content: '⚡'; font-size: 0.8rem; color: var(--gold);
+}
+
+.easel-card {
+  flex: 1; min-width: 130px; max-width: 170px;
+  background: var(--surface2); border: 1px solid var(--line);
+  border-radius: 4px; padding: 12px 10px; text-align: center;
+  position: relative; transition: all 0.25s ease;
+}
+.easel-card:hover {
+  border-color: var(--green);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 16px rgba(111,191,63,0.25);
+}
+.easel-num {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.15em; color: var(--green); text-transform: uppercase;
+  margin-bottom: 4px; display: block;
+}
+.easel-artist {
+  font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem;
+  font-weight: 700; color: var(--ink); line-height: 1.2;
+}
+.easel-status {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem;
+  color: var(--ink-dim); margin-top: 6px; opacity: 0.8;
+}
+
+.bracket-note{
+  text-align:center; margin-top:18px; color:var(--ink-dim); font-size:0.75rem;
+  font-family:'IBM Plex Mono', monospace; letter-spacing: 0.05em; position: relative; z-index: 1;
+}
 
 /* ===== Timeline ===== */
 .timeline{ position:relative; padding-left:2px; }
@@ -366,21 +419,49 @@ footer .brandline{ color:var(--green-glow); letter-spacing:0.1em; text-transform
         <li>All materials supplied to the artist</li>
       </ul>
     </div>
+    
+    <!-- Redesigned Stage Layout Area -->
     <div class="bracket">
-      <div class="bracket-label">Stage Layout</div>
-      <div class="vs-grid">
-        <div class="vs-col">
-          <div class="slot">Mark Juber</div>
-          <div class="slot">Pauly Knipfer</div>
-          <div class="slot">Bernard Lawrence</div>
+      <div class="bracket-label">Stage Floor Layout</div>
+      
+      <div class="stage-floor">
+        <div class="stage-row">
+          <div class="easel-card">
+            <span class="easel-num">Easel 01</span>
+            <div class="easel-artist">Mark Juber</div>
+            <div class="easel-status">● Ready</div>
+          </div>
+          <div class="easel-card">
+            <span class="easel-num">Easel 02</span>
+            <div class="easel-artist">Pauly Knipfer</div>
+            <div class="easel-status">● Ready</div>
+          </div>
+          <div class="easel-card">
+            <span class="easel-num">Easel 03</span>
+            <div class="easel-artist">Bernard Lawrence</div>
+            <div class="easel-status">● Ready</div>
+          </div>
         </div>
-        <div class="vs-center">VS</div>
-        <div class="vs-col">
-          <div class="slot">Rooster Inkk</div>
-          <div class="slot">Faith Moody</div>
+
+        <div class="stage-center-hub">
+          <div class="stage-hub-title">Live Battle Arena</div>
+        </div>
+
+        <div class="stage-row">
+          <div class="easel-card">
+            <span class="easel-num">Easel 04</span>
+            <div class="easel-artist">Rooster Inkk</div>
+            <div class="easel-status">● Ready</div>
+          </div>
+          <div class="easel-card">
+            <span class="easel-num">Easel 05</span>
+            <div class="easel-artist">Faith Moody</div>
+            <div class="easel-status">● Ready</div>
+          </div>
         </div>
       </div>
-      <div class="bracket-note">All five battle simultaneously — not a bracket elimination</div>
+
+      <div class="bracket-note">All five artists battle live on stage simultaneously</div>
     </div>
   </div>
 </section>
@@ -516,7 +597,7 @@ footer .brandline{ color:var(--green-glow); letter-spacing:0.1em; text-transform
     <div class="card">
       <h3>Location</h3>
       <p style="color:var(--ink-dim); font-size:0.9rem;">Phoenix Phoodery<br>Medford, Oregon</p>
-      <p class="fee-note">Full address &amp; parking details to follow as the date is confirmed.</p>
+      <p class="fee-note">208 N Main St, Phoenix, OR 97535 &amp; parking details at event is confirmed.</p>
     </div>
   </div>
 </section>
