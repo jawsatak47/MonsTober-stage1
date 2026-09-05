@@ -175,7 +175,7 @@ nav{
 }
 .spec-list li::before{ content:'▚'; position:absolute; left:0; color:var(--green); }
 
-/* ===== Redesigned Stage Layout ===== */
+/* ===== Stage Layout ===== */
 .bracket{
   background: radial-gradient(ellipse at center, rgba(111,191,63,0.05) 0%, rgba(18,22,13,0.95) 70%), var(--surface);
   border:1px solid var(--line); border-radius:6px;
@@ -233,9 +233,15 @@ nav{
   letter-spacing: 0.15em; color: var(--green); text-transform: uppercase;
   margin-bottom: 4px; display: block;
 }
-.easel-artist {
+.easel-artist-link {
   font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem;
   font-weight: 700; color: var(--ink); line-height: 1.2;
+  text-decoration: none; display: inline-block;
+  transition: color 0.2s ease, text-decoration 0.2s ease;
+}
+.easel-artist-link:hover {
+  color: var(--green-glow);
+  text-decoration: underline;
 }
 .easel-status {
   font-family: 'IBM Plex Mono', monospace; font-size: 0.6rem;
@@ -420,7 +426,7 @@ footer .brandline{ color:var(--green-glow); letter-spacing:0.1em; text-transform
       </ul>
     </div>
     
-    <!-- Redesigned Stage Layout Area -->
+    <!-- Stage Layout Area with Clickable Artist Links -->
     <div class="bracket">
       <div class="bracket-label">Stage Floor Layout</div>
       
@@ -428,17 +434,17 @@ footer .brandline{ color:var(--green-glow); letter-spacing:0.1em; text-transform
         <div class="stage-row">
           <div class="easel-card">
             <span class="easel-num">Easel 01</span>
-            <div class="easel-artist">Mark Juber</div>
+            <a class="easel-artist-link" href="https://www.facebook.com/mark.juber.257455" target="_blank" rel="noopener noreferrer">Mark Juber</a>
             <div class="easel-status">● Ready</div>
           </div>
           <div class="easel-card">
             <span class="easel-num">Easel 02</span>
-            <div class="easel-artist">Pauly Knipfer</div>
+            <a class="easel-artist-link" href="https://www.facebook.com/pauly.knipfer" target="_blank" rel="noopener noreferrer">Pauly Knipfer</a>
             <div class="easel-status">● Ready</div>
           </div>
           <div class="easel-card">
             <span class="easel-num">Easel 03</span>
-            <div class="easel-artist">Bernard Lawrence</div>
+            <a class="easel-artist-link" href="https://www.facebook.com/burnie.lawrence" target="_blank" rel="noopener noreferrer">Bernard Lawrence</a>
             <div class="easel-status">● Ready</div>
           </div>
         </div>
@@ -450,12 +456,12 @@ footer .brandline{ color:var(--green-glow); letter-spacing:0.1em; text-transform
         <div class="stage-row">
           <div class="easel-card">
             <span class="easel-num">Easel 04</span>
-            <div class="easel-artist">Rooster Inkk</div>
+            <a class="easel-artist-link" href="https://www.facebook.com/roosterinkk" target="_blank" rel="noopener noreferrer">Rooster Inkk</a>
             <div class="easel-status">● Ready</div>
           </div>
           <div class="easel-card">
             <span class="easel-num">Easel 05</span>
-            <div class="easel-artist">Faith Moody</div>
+            <a class="easel-artist-link" href="https://www.facebook.com/faith.moody.3344913" target="_blank" rel="noopener noreferrer">Faith Moody</a>
             <div class="easel-status">● Ready</div>
           </div>
         </div>
